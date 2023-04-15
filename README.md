@@ -95,7 +95,7 @@ provider "aws
   region = "us-east-1"
 
 module "network
-  source        = "app.terraform.io/bigfantech/network/aws"
+  source        = "bigfantech-cloud/network/aws"
   version       = "1.0.0"
   cidr_block    = "10.0.0.0/16"
   project_name  = "abc"
@@ -103,7 +103,7 @@ module "network
 
 
 module "alb {
-  source      = "app.terraform.io/bigfantech/alb-ecs/aws"
+  source      = "bigfantech-cloud/alb-ecs/aws"
   version     = "3.0.0"
 
   project_name             = "abc"

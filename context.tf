@@ -1,5 +1,5 @@
 #
-# ONLY EDIT THIS FILE IN https://github.com/bigfantech/terraform-null-label/blob/main/exports/
+# ONLY EDIT THIS FILE IN https://github.com/bigfantech-cloud/terraform-null-label/blob/main/exports/
 # All other instances of this file should be a copy of that one
 
 # This is customised version of `label` module from cloudposse. Courtesy: [cloudposse](https://cloudposse.com)
@@ -15,7 +15,7 @@
 #
 
 module "this" {
-  source  = "app.terraform.io/bigfantech/label/null"
+  source  = "bigfantech-cloud/label/null"
   version = "1.0.0"
 
   enabled             = var.enabled
