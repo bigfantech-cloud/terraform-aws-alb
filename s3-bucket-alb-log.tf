@@ -12,11 +12,6 @@ resource "aws_s3_bucket" "alb_logs" {
   )
 }
 
-resource "aws_s3_bucket_acl" "bucket-acl" {
-  bucket = aws_s3_bucket.alb_logs.id
-  acl    = "log-delivery-write"
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "bucket-encryption" {
   bucket = aws_s3_bucket.alb_logs.id
   rule {
