@@ -65,13 +65,15 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_certificate" "https" {
-  count           = length(var.additional_ssl_certificate_arn)
+  for_each  = toset(var.additional_ssl_certificate_arn)
+  
   listener_arn    = aws_lb_listener.https.arn
-  certificate_arn = var.additional_ssl_certificate_arn[count.index]
+  certificate_arn = each.value
 }
 
 resource "aws_lb_listener_rule" "host_header_forward" {
-  for_each     = var.listener_rules
+  for_each  = var.listener_rules
+  
   listener_arn = aws_lb_listener.https.arn
   priority     = 99 - index(keys(var.listener_rules), each.key)
 
