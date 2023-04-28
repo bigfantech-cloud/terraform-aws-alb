@@ -34,7 +34,6 @@ resource "aws_lb" "alb" {
 #-----
 
 resource "aws_lb_listener" "http" {
-
   load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
@@ -51,7 +50,6 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_listener" "https" {
-
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
