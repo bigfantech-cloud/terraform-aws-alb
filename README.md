@@ -26,7 +26,7 @@ IAM policy to the S3 buckets.
 - target_group_target_type      LB Target Goup target type. Ex: instance, ip, lambda, alb.
                                 Default = ip.
 - targetgroup_for
-    Map of Target Group identifier to map of optional Target Group configs
+    Map of, Target Group identifier to map of optional Target Group configs
     `healthcheck_path`, `healthcheck_protocol`, `healthcheck_matcher`
     No. of objects in map = No. of Target Group created.
       example:
@@ -104,7 +104,7 @@ module "network
 
 module "alb {
   source      = "bigfantech-cloud/alb-ecs/aws"
-  version     = "3.0.0"
+  version     = "1.0.0"
 
   project_name             = "abc"
   environment              = "dev"
