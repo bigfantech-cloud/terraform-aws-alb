@@ -12,6 +12,7 @@ variable "log_bucket_force_destroy" {
   type        = bool
   default     = false
 }
+
 #-----
 # ALB
 #-----
@@ -33,10 +34,6 @@ variable "subnets" {
   EOF
   type        = list(string)
 }
-
-#----------------
-# LB SG AND LB LISTENERS
-#----------------
 
 variable "http_ingress_cidr_blocks" {
   description = "List of CIDR blocks allowed to access the Load Balancer through HTTP"
