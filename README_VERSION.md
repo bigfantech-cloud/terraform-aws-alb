@@ -2,4 +2,4 @@
 
 ### Major
 
-First Standard version.
+Initial release.
