@@ -30,7 +30,7 @@ resource "aws_lb" "alb" {
 }
 
 #-----
-#LISTENERS
+# LISTENERS
 #-----
 
 resource "aws_lb_listener" "http" {
@@ -63,26 +63,40 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_certificate" "https" {
-  for_each  = toset(var.additional_ssl_certificate_arn)
-  
+  for_each = toset(var.additional_ssl_certificate_arn)
+
   listener_arn    = aws_lb_listener.https.arn
   certificate_arn = each.value
 }
 
 resource "aws_lb_listener_rule" "host_header_forward" {
-  for_each  = var.listener_rules
-  
+  for_each = var.listener_rules
+
   listener_arn = aws_lb_listener.https.arn
-  priority     = 99 - index(keys(var.listener_rules), each.key)
+  priority     = try(each.value["priority"], 99 - index(keys(var.listener_rules), each.key))
 
   action {
     type             = "forward"
     target_group_arn = local.target_group_arn_map[each.key]
   }
 
-  condition {
-    host_header {
-      values = each.value
+  dynamic "condition" {
+    for_each = can(each.value["host_header"]) ? [each.key] : []
+
+    content {
+      host_header {
+        values = var.listener_rules[condition.value].host_header
+      }
+    }
+  }
+
+  dynamic "condition" {
+    for_each = can(each.value["path_pattern"]) ? [each.key] : []
+
+    content {
+      path_pattern {
+        values = var.listener_rules[condition.value].path_pattern
+      }
     }
   }
 
@@ -90,30 +104,30 @@ resource "aws_lb_listener_rule" "host_header_forward" {
 }
 
 #----------
-#TARGET GROUPS
+# TARGET GROUP
 #----------
 
 resource "aws_lb_target_group" "alb_https_tg" {
   for_each = var.targetgroup_for
 
-  name                 = "${module.this.id}-${each.key}"
+  name_prefix          = "${module.this.id}-${each.key}"
   port                 = var.target_group_port
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
-  target_type          = var.target_group_target_type
-  deregistration_delay = var.deregistration_delay
+  target_type          = var.target_type
+  deregistration_delay = var.target_deregistration_delay
 
   stickiness {
-    enabled         = var.stickiness_enabled
-    type            = var.stickiness_type
-    cookie_name     = var.stickiness_cookie_name
-    cookie_duration = var.stickiness_cookie_duration
+    enabled         = var.target_stickiness_config != {} ? true : false
+    type            = var.target_stickiness_config["type"]
+    cookie_name     = try(var.target_stickiness_config["cookie_name"], null)
+    cookie_duration = try(var.target_stickiness_config["cookie_duration"], 86400)
   }
 
   health_check {
-    path     = lookup(each.value, "healthcheck_path", "/")
-    protocol = lookup(each.value, "healthcheck_protocol", "HTTP")
-    matcher  = lookup(each.value, "healthcheck_matcher", 200)
+    path     = try(each.value["healthcheck_path"], "/")
+    protocol = try(each.value["healthcheck_protocol"], "HTTP")
+    matcher  = try(each.value["healthcheck_matcher"], 200)
   }
 
 

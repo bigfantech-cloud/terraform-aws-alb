@@ -76,15 +76,18 @@ variable "additional_security_groups" {
 
 variable "listener_rules" {
   description = <<-EOF
-  Map of Listener Rule specification.  Format: Target Group Identifier = ["domain"]
-  This Rule creates "forward" action with "host_header" condition.
-  For any other actions/conditions, create Listener Rule resource outside this module.
+  Map of Listener Rule specification.
+  This Rule creates "forward" action with `host_header`/`path_pattern` condition.
   
-  Ex: {
-        "server"      = ["*server.com*"]
-        "adminportal" = ["*adminportal.com*"]
-      }
-
+  example: {
+    server = {
+      host_header             = ["*server.com*"] # optional, either `host_header` or `path_pattern` required
+      path_pattern            = ["/login/*"]     # optional, either `host_header` or `path_pattern` required
+    }
+    adminportal = {
+      host_header             = ["*adminportal.com*"] 
+    }
+  }
   default     = {}
   EOF
   type        = map(any)
@@ -98,7 +101,7 @@ variable "listener_rules" {
 
 variable "targetgroup_for" {
   description = <<-EOF
-  Map of Target Group identifier to map of optional Target Group configs
+  Map of, Target Group identifier to map of optional Target Group configs
   `healthcheck_path`, `healthcheck_protocol`, `healthcheck_matcher`
   No. of objects in map = No. of Target Group created.
   
@@ -116,56 +119,56 @@ variable "targetgroup_for" {
   type        = map(any)
 }
 
-
 variable "target_group_port" {
   description = "The target group port"
   type        = number
   default     = 80
 }
 
-variable "target_group_target_type" {
-  description = "LB Target Goup target type. Ex: instance, ip, lambda, alb. Default = ip"
+variable "target_type" {
+  description = "LB Target Goup target type. example: instance, ip, lambda, alb. Default = ip"
   type        = string
   default     = "ip"
 }
 
-variable "deregistration_delay" {
-  description = "delay to desigster fargate spot tasks"
+variable "target_deregistration_delay" {
+  description = <<-EOT
+    Time, in seconds, that an ALB should wait before changing the routing
+    of traffic from a target that is being taken out of service.
+    This allows the target to finish in-flight requests before traffic is redirected. Default = 100
+  EOT
   type        = number
   default     = 100
 }
 
-variable "stickiness_enabled" {
-  description = "Boolean to enable / disable stickiness. Default = true."
-  type        = bool
-  default     = true
-}
+variable "target_stickiness_config" {
+  description = <<-EOT
+  Map of stickiness configs, containing
+  - `type`            = Possible values are lb_cookie, app_cookie.
+  - `cookie_name`     = (optional) Name of the application based cookie. Only needed when `type` is app_cookie.
+                        AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used.
+  - `cookie_duration` = (optional) Only used when the `type` is lb_cookie.
+                        The time period, in seconds, during which requests from a client should be routed to the same target.
+                        After this time period expires, the load balancer-generated cookie is considered stale.
+                        The range is 1 second to 1 week (604800 seconds).
 
-variable "stickiness_type" {
-  description = "Target Goup Stickiness type. Possible values are lb_cookie, app_cookie. Default = lb_cookie"
-  type        = string
-  default     = "lb_cookie"
-}
+  default = {
+    stickiness_type            = "lb_cookie"
+    stickiness_cookie_name     = null
+    stickiness_cookie_duration = 86400
+  }
 
-variable "stickiness_cookie_name" {
-  description = <<-EOF
-  Name of the application based cookie. Only needed when type is app_cookie.
-  AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used.
-  Default = null
-  EOF
-  type        = string
-  default     = null
-}
-
-variable "stickiness_cookie_duration" {
-  description = <<-EOF
-  Only used when the type is lb_cookie.
-  The time period, in seconds, during which requests from a client should be routed to the same target.
-  After this time period expires, the load balancer-generated cookie is considered stale.
-  The range is 1 second to 1 week (604800 seconds).
-  Default = 86400.
-  EOF
-  type        = number
-  default     = 86400
+  to disable stickiness, set `target_stickiness_config = {}`
+  EOT
+  type = object({
+    stickiness_type            = optional(string)
+    stickiness_cookie_name     = optional(string)
+    stickiness_cookie_duration = optional(number)
+  })
+  default = {
+    stickiness_type            = "lb_cookie"
+    stickiness_cookie_name     = null
+    stickiness_cookie_duration = 86400
+  }
 }
 
