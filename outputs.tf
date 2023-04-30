@@ -61,6 +61,6 @@ output "alb_target_group_arn_map" {
 #-----
 
 output "alb_security_group_id" {
-  description = "ID of Security Group attached to ALB."
+  description = "ID of Security Group attached to ALB"
   value       = aws_security_group.alb.id
 }

@@ -2,11 +2,6 @@
 # S3 BUCKET
 #-----
 
-variable "random_string" {
-  description = "Creates 3 digit random number for S3 bucket name suffix if enabled. Default = false."
-  default     = "false"
-}
-
 variable "log_bucket_force_destroy" {
   description = "Delete all objects from the bucket so that the bucket can be destroyed without error (e.g. `true` or `false`)"
   type        = bool
@@ -18,12 +13,12 @@ variable "log_bucket_force_destroy" {
 #-----
 
 variable "internal" {
-  description = "is ALB internal: true/false, default internal = false"
+  description = "is ALB internal: true/false, default = false"
   default     = "false"
 }
 
 variable "vpc_id" {
-  description = "vpc_id"
+  description = "VPC ID to create resources in"
   type        = string
 }
 
@@ -48,15 +43,14 @@ variable "https_ingress_cidr_blocks" {
 }
 
 variable "ssl_policy" {
-  description = "The name of the SSL Policy for the listener. . Required if var.https_ports is set."
+  description = "Name of the SSL Policy for the listener. Default = null"
   type        = string
   default     = null
 }
 
 variable "default_ssl_certificate_arn" {
-  description = "The ARN of the default SSL server certificate."
+  description = "The ARN of the default SSL server certificate"
   type        = string
-  default     = null
 }
 
 variable "additional_ssl_certificate_arn" {

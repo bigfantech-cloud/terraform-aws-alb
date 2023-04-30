@@ -1,65 +1,65 @@
-# Purpose:
+# BigFantech-Cloud
 
-Used in ECS Fargate setup.
+We automate your infrastructure.
+You will have full control of your infrastructure, including Infrastructure as Code (IaC).
 
-To create, Application Load Balancer, ALB access log setup, S3 bucket to save the access logs,
-IAM policy to the S3 buckets.
+To hire, email: `bigfantech@yahoo.com`
+
+# Purpose of this code
+
+> Terraform module
+
+To create Application Load Balancer, ALB access log setup to S3 bucket.
 
 1. ALB listener = port 80, redirect to port 443.
 2. ALB listener = port 443, forward to target group.
-
 3. Security Group = egress allowed on all the ports, and protocols.
    ingress rule = port 80 open
-   ingress rule = port 443 open.
+   ingress rule = port 443 open
 
-# Steps to create the resources
+## Variables
 
-1. Call the module from your tf code.
-2. Specify the variable inputs.
+### Required Variables
 
-Example:
+| Name                             | Description                                                                                                                                                                                                         | Default |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `vpc_id`                         | VPC ID to create resources in                                                                                                                                                                                       |         |
+| `subnets`                        | list of private subnet IDs to attach to the LB                                                                                                                                                                      |         |
+| `default_ssl_certificate_arn`    | The ARN of the default SSL server certificate for HTTPS listener                                                                                                                                                    |         |
+| `additional_ssl_certificate_arn` | List of additional SSL server certificate ARN. This does not replace the default certificate on the listener                                                                                                        | []      |
+| `additional_security_groups`     | A list of security group IDs to assign to the LB                                                                                                                                                                    | []      |
+| `targetgroup_for`                | Target group config. Map of, Target Group identifier to map of optional Target Group configs `healthcheck_path`, `healthcheck_protocol`, `healthcheck_matcher`. No. of objects in map = No. of Target Group created |         |
 
-```
-provider "aws
-  region = "us-east-1"
+### Optional Variables
 
-module "network
-  source        = "bigfantech-cloud/network/aws"
-  version       = "1.0.0"
-  cidr_block    = "10.0.0.0/16"
-  project_name  = "abc"
-  environment   = "dev"
+| Name                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Default                                                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `log_bucket_force_destroy`    | Delete all objects from the bucket so that the bucket can be destroyed without error (e.g. `true` or `false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | false                                                                                                          |
+| `internal`                    | is ALB internal                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | false                                                                                                          |
+| `http_ingress_cidr_blocks`    | List of CIDR blocks allowed to access the Load Balancer through HTTP                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ["0.0.0.0/0"]                                                                                                  |
+| `https_ingress_cidr_blocks`   | List of CIDR blocks allowed to access the Load Balancer through HTTPS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ["0.0.0.0/0"]                                                                                                  |
+| `ssl_policy`                  | Name of the SSL Policy for the listener                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | null                                                                                                           |
+| `listener_rules`              | Map of Listener Rule specification. This Rule creates "forward" action with `host_header`/`path_pattern` condition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | {}                                                                                                             |
+| `target_group_port`           | The target group port                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 80                                                                                                             |
+| `target_deregistration_delay` | Time, in seconds, that an ALB should wait before changing the routing of traffic from a target that is being taken out of service. This allows the target to finish in-flight requests before traffic is redirected                                                                                                                                                                                                                                                                                                                                                                                                   | 100                                                                                                            |
+| `target_stickiness_config`    | Map of stickiness configs, containing<br>- `type` = Possible values are lb_cookie, app_cookie.<br>- `cookie_name` = (optional) Name of the application based cookie. Only needed when `type` is app_cookie. AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used.<br>- `cookie_duration` = (optional) Only used when the `type` is lb_cookie. The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to `1` week (`604800` seconds). | {<br>stickiness_type = "lb_cookie"<br>stickiness_cookie_name = null<br>stickiness_cookie_duration = 86400<br>} |
 
+### Example config
 
-module "alb {
-  source      = "bigfantech-cloud/alb-ecs/aws"
-  version     = "1.0.0"
+> Check the `example` folder in this repo
 
-  project_name             = "abc"
-  environment              = "dev"
-  vpc_id                   = module.network.vpc_id
-  subnets                  = module.network.public_subnet_ids
-  log_bucket_force_destroy = true
+### Outputs
 
-  targetgroup_for          = {
-                              server = {healthcheck_path = "/login"}
-                              admin = {
-                                healthcheck_path = "/"
-                                healthcheck_protocol = "HTTP"
-                                healthcheck_matcher =200
-                              }
-                              client = {}
-                            }
-
-  target_group_port        = 80
-  default_certificate_arn  = "arn:::"
-
-  listener_rules = {
-    "server"      = ["*server.com*"]
-    "adminportal" = ["*adminportal.com*"]
-  }
-}
-
-
-
-```
+| Name                        | Description                                                  |
+| --------------------------- | ------------------------------------------------------------ |
+| `alb_log_bucket_id`         | ALB log S3 bucket ID                                         |
+| `alb_log_bucket_arn`        | ALB log S3 bucket ARN                                        |
+| `alb_id`                    | ALB ID                                                       |
+| `alb_arn`                   | ALB ARN                                                      |
+| `alb_dns_name`              | LB DNS name                                                  |
+| `alb_zone_id`               | LB zone ID                                                   |
+| `alb_http_listener_arn`     | ALB HTTP listener ARN                                        |
+| `alb_https_listener_arn`    | ALB HTTPS listener ARN                                       |
+| `alb_target_group_arn_list` | List of ALB Target Groups ARN                                |
+| `alb_target_group_arn_map`  | Map of ALB Target Groups ARN to Target Group name identifier |
+| `alb_security_group_id`     | ID of Security Group attached to ALB                         |
