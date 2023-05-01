@@ -1,6 +1,6 @@
 # v1.1.0
 
-### what changed:
+#### what changed:
 
 S3 log bucket Lifecycle configuration added to transfer to `glacier` post 365 days.
 
