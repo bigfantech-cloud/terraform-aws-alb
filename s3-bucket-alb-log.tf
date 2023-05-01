@@ -55,3 +55,17 @@ resource "aws_s3_bucket_policy" "lb_logs_access_policy" {
   bucket = aws_s3_bucket.alb_logs.id
   policy = data.aws_iam_policy_document.lb_logs_access_policy_document.json
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "datadog_log_archive" {
+  bucket = aws_s3_bucket.alb_logs.id
+  status = "Enabled"
+  
+  rule {
+    id = "glacier-one-year-old"
+
+    transition {
+      days          = 365
+      storage_class = "GLACIER"
+    }
+  }
+}
