@@ -11,13 +11,13 @@ variable "log_bucket_force_destroy" {
 variable "log_bucket_transition_days" {
   description = "Days after which log bucket objects are transitioned to Glacier. Default = 365"
   type        = number
-  default     = 365
+  default     = 180
 }
 
 variable "log_bucket_expiry_days" {
   description = "Days after which log bucket objects are deleted. Default = 730"
   type        = number
-  default     = 730
+  default     = 365
 }
 
 #-----
