@@ -4,7 +4,7 @@
 
 #### what changed:
 
-S3 log bucket Lifecycle transition, and expiration added.
+S3 log bucket Lifecycle transition, and expiration added
 
 #### reason for change:
 
