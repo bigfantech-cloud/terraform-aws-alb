@@ -1,6 +1,6 @@
 # v1.1.0
 
-### Minor
+### Feature
 
 #### what changed:
 
