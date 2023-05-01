@@ -1,32 +1,20 @@
-# v1.1.1
+# v1.1.0
 
 ### Minor
 
 #### what changed:
 
-S3 log bucket Lifecycle expiration added. Expiration, and transition days are made as variables
+S3 log bucket Lifecycle transition, and expiration added.
 
 #### reason for change:
 
-To add lifecycle expiration
+To add lifecycle transition, and expiration
 
 #### info:
 
-`log_bucket_transition_days`: Days after which log bucket objects are transitioned to Glacier. Default = 365
+`log_bucket_transition_days`: Days after which log bucket objects are transitioned to Glacier. Default = 180
 
-`log_bucket_expiry_days`:     Days after which log bucket objects are deleted. Default = 730
-
-# v1.1.0
-
-### Feture
-
-#### what changed:
-
-S3 log bucket Lifecycle configuration added to transfer to `glacier` post 365 days.
-
-#### reason for change:
-
-S3 bucket Lifecycle configuration
+`log_bucket_expiry_days`:     Days after which log bucket objects are deleted. Default = 365
 
 # v1.0.0
 
