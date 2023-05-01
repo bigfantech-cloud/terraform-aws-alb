@@ -4,7 +4,7 @@
 
 #### what changed:
 
-S3 log bucket Lifecycle expiration added. Expiration, and transition days are made as variables.
+S3 log bucket Lifecycle expiration added. Expiration, and transition days are made as variables
 
 #### reason for change:
 
