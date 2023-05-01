@@ -13,6 +13,7 @@ To add lifecycle expiration
 #### info:
 
 `log_bucket_transition_days`: Days after which log bucket objects are transitioned to Glacier. Default = 365
+
 `log_bucket_expiry_days`:     Days after which log bucket objects are deleted. Default = 730
 
 # v1.1.0
