@@ -61,10 +61,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "datadog_log_archive" {
   status = "Enabled"
   
   rule {
-    id = "glacier-one-year-old"
+    id = "glacier-${var.log_bucket_transition_days}-days-expiry-${var.log_bucket_expiry_days}-days"
+  
+    expiration {
+        days = var.log_bucket_expiry_days
+    }
 
     transition {
-      days          = 365
+      days          = var.log_bucket_transition_days
       storage_class = "GLACIER"
     }
   }
