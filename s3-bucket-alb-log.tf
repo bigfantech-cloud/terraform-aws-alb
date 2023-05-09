@@ -58,10 +58,10 @@ resource "aws_s3_bucket_policy" "lb_logs_access_policy" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "datadog_log_archive" {
   bucket = aws_s3_bucket.alb_logs.id
-  status = "Enabled"
   
   rule {
-    id = "glacier-${var.log_bucket_transition_days}-days-expiry-${var.log_bucket_expiry_days}-days"
+    id      = "glacier-${var.log_bucket_transition_days}-days-expiry-${var.log_bucket_expiry_days}-days"
+    status  = "Enabled"
   
     expiration {
         days = var.log_bucket_expiry_days
