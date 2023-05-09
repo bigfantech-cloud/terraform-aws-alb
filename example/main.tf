@@ -26,12 +26,12 @@ module "alb" {
 
   targetgroup_for = {
     server = { healthcheck_path = "/login" }
-    admin = {
+    adminportal = {
       healthcheck_path     = "/"
       healthcheck_protocol = "HTTP"
       healthcheck_matcher  = 200
     }
-    client = {}
+    clientportal = {}
   }
 
   listener_rules = {
@@ -41,6 +41,9 @@ module "alb" {
     }
     adminportal = {
       host_header             = ["*adminportal.com*"] 
+    }
+    clientportal = {
+      host_header             = ["*clientportal.com*"] 
     }
   }
 }
