@@ -4,7 +4,7 @@ provider "aws" {
 
 module "network" {
   source  = "bigfantech-cloud/network/aws"
-  version = "a.b.c" # find latest version from https://registry.terraform.io/modules/bigfantech-cloud/network/aws/latest
+  # version = "" find the latest version from https://registry.terraform.io/modules/bigfantech-cloud/network/aws/latest
 
   cidr_block   = "10.0.0.0/16"
   project_name = "abc"
@@ -13,7 +13,7 @@ module "network" {
 
 module "alb" {
   source  = "bigfantech-cloud/alb-ecs/aws"
-  version = "a.b.c" # find latest version from https://registry.terraform.io/modules/bigfantech-cloud/ecs-alb/aws/latest
+  # version = "" find the latest version from https://registry.terraform.io/modules/bigfantech-cloud/ecs-alb/aws/latest
 
   project_name             = "abc"
   environment              = "dev"
@@ -35,7 +35,12 @@ module "alb" {
   }
 
   listener_rules = {
-    "server"      = ["*server.com*"]
-    "adminportal" = ["*adminportal.com*"]
+    server = {
+      host_header             = ["*server.com*"] # optional, either `host_header` or `path_pattern` required
+      path_pattern            = ["/login/*"]     # optional, either `host_header` or `path_pattern` required
+    }
+    adminportal = {
+      host_header             = ["*adminportal.com*"] 
+    }
   }
 }
