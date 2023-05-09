@@ -157,24 +157,23 @@ variable "target_stickiness_config" {
                         The time period, in seconds, during which requests from a client should be routed to the same target.
                         After this time period expires, the load balancer-generated cookie is considered stale.
                         The range is 1 second to 1 week (604800 seconds).
+  To disable stickiness, set `target_stickiness_config = {}`
 
   default = {
-    stickiness_type            = "lb_cookie"
-    stickiness_cookie_name     = null
-    stickiness_cookie_duration = 86400
+    type            = "lb_cookie"
+    cookie_name     = null
+    cookie_duration = 86400
   }
-
-  to disable stickiness, set `target_stickiness_config = {}`
   EOT
   type = object({
-    stickiness_type            = optional(string)
-    stickiness_cookie_name     = optional(string)
-    stickiness_cookie_duration = optional(number)
+    type            = optional(string)
+    cookie_name     = optional(string)
+    cookie_duration = optional(number)
   })
   default = {
-    stickiness_type            = "lb_cookie"
-    stickiness_cookie_name     = null
-    stickiness_cookie_duration = 86400
+    type            = "lb_cookie"
+    cookie_name     = null
+    cookie_duration = 86400
   }
 }
 
