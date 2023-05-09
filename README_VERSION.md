@@ -1,3 +1,22 @@
+# v1.1.1
+
+### Fix
+
+#### what changed:
+
+- Fix: S3 log bucket Lifecycle status attribute moved inside rule
+- Fix: `listener_rules` var default value keys name correction
+- Fix: target_group `name_prefix` change -> `name`
+
+#### reason for change:
+
+- Fix: S3 log bucket Lifecycle status attribute was in wrong place
+- Fix: `listener_rules` var default value keys name incorrect
+- Fix: target_group `name_prefix` character limts to 6
+
+#### info:
+
+
 # v1.1.0
 
 ### Feature
