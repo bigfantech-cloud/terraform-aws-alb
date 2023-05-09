@@ -118,10 +118,10 @@ resource "aws_lb_target_group" "alb_https_tg" {
   deregistration_delay = var.target_deregistration_delay
 
   stickiness {
-    enabled         = var.target_stickiness_config != {} ? true : false
+    enabled         = length(var.target_stickiness_config) > 0 ? true : false
     type            = var.target_stickiness_config["type"]
-    cookie_name     = try(var.target_stickiness_config["cookie_name"], null)
-    cookie_duration = try(var.target_stickiness_config["cookie_duration"], 86400)
+    cookie_name     = var.target_stickiness_config["cookie_name"]
+    cookie_duration = var.target_stickiness_config["cookie_duration"]
   }
 
   health_check {
