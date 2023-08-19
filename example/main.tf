@@ -12,8 +12,8 @@ module "network" {
 }
 
 module "alb" {
-  source = "bigfantech-cloud/alb-ecs/aws"
-  # version = "" find the latest version from https://registry.terraform.io/modules/bigfantech-cloud/ecs-alb/aws/latest
+  source = "bigfantech-cloud/alb/aws"
+  # version = "" find the latest version from https://registry.terraform.io/modules/bigfantech-cloud/alb/aws/latest
 
   project_name             = "abc"
   environment              = "dev"
