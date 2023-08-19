@@ -3,7 +3,7 @@
 #-----
 
 variable "log_bucket_force_destroy" {
-  description = "Delete all objects from the bucket so that the bucket can be destroyed without error (e.g. `true` or `false`)"
+  description = "Delete all objects from the bucket so that the bucket can be destroyed without error"
   type        = bool
   default     = false
 }
@@ -25,8 +25,8 @@ variable "log_bucket_expiry_days" {
 #-----
 
 variable "internal" {
-  description = "is ALB internal: true/false, default = false"
-  default     = "false"
+  description = "Is ALB internal. Default = true"
+  default     = true
 }
 
 variable "vpc_id" {
@@ -35,21 +35,18 @@ variable "vpc_id" {
 }
 
 variable "subnets" {
-  description = <<-EOF
-  "A list of private subnet IDs to attach to the LB if it is INTERNAL.
-  OR list of public subnet IDs to attach to the LB if it is NOT internal."
-  EOF
+  description = "List of subnet IDs to associate to the LB"
   type        = list(string)
 }
 
 variable "http_ingress_cidr_blocks" {
-  description = "List of CIDR blocks allowed to access the Load Balancer through HTTP"
+  description = "List of CIDR blocks allowed on port 80 in LB SG"
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
 
 variable "https_ingress_cidr_blocks" {
-  description = "List of CIDR blocks allowed to access the Load Balancer through HTTPS"
+  description = "List of CIDR blocks allowed on port 443 in LB SG"
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
@@ -81,24 +78,15 @@ variable "additional_security_groups" {
 }
 
 variable "listener_rules" {
-  description = <<-EOF
-  Map of Listener Rule specification.
-  This Rule creates "forward" action with `host_header`/`path_pattern` condition.
-  
-  example: {
-    server = {
-      host_header             = ["*server.com*"] # optional, either `host_header` or `path_pattern` required
-      path_pattern            = ["/login/*"]     # optional, either `host_header` or `path_pattern` required
-    }
-    adminportal = {
-      host_header             = ["*adminportal.com*"] 
-    }
-  }
-  default     = {}
+  description = <<EOF
+  Map of Target Group identifier to Listener `host_header`, `path_pattern` condition. This creates "forward" action to the given Target Group.
+  Either `host_header` or `path_pattern` is requried.
   EOF
-  type        = map(any)
-  default     = {}
-
+  type = map(object({
+    host_header  = optional(list(string))
+    path_pattern = optional(list(string))
+  }))
+  default = {}
 }
 
 #------
@@ -106,74 +94,27 @@ variable "listener_rules" {
 #------
 
 variable "targetgroup_for" {
-  description = <<-EOF
-  Map of, Target Group identifier to map of optional Target Group configs
-  `healthcheck_path`, `healthcheck_protocol`, `healthcheck_matcher`
-  No. of objects in map = No. of Target Group created.
-  
-  example: 
-  targetgroup_for = {
-    server = {healthcheck_path = "/login"}
-    admin = {
-      healthcheck_path = "/"
-      healthcheck_protocol = "HTTP"
-      healthcheck_matcher =200
-    }
-    client = {}
-  }
-  EOF
-  type        = map(any)
+  description = "Map of Target Group identifier to Target Group configs"
+  type = map(object({
+    port                 = number
+    protocol             = optional(string)
+    protocol_version     = optional(string)
+    target_type          = optional(string)
+    slow_start           = optional(number)
+    deregistration_delay = optional(number)
+    ip_address_type      = optional(string)
+    preserve_client_ip   = optional(bool)
+    enabled              = optional(bool)
+    type                 = optional(string)
+    cookie_name          = optional(string)
+    cookie_duration      = optional(number)
+    enabled              = optional(bool)
+    path                 = optional(string)
+    protocol             = optional(string)
+    port                 = optional(number)
+    matcher              = optional(number)
+    interval             = optional(number)
+    timeout              = optional(number)
+    unhealthy_threshold  = optional(number)
+  }))
 }
-
-variable "target_group_port" {
-  description = "The target group port"
-  type        = number
-  default     = 80
-}
-
-variable "target_type" {
-  description = "LB Target Goup target type. example: instance, ip, lambda, alb. Default = ip"
-  type        = string
-  default     = "ip"
-}
-
-variable "target_deregistration_delay" {
-  description = <<-EOT
-    Time, in seconds, that an ALB should wait before changing the routing
-    of traffic from a target that is being taken out of service.
-    This allows the target to finish in-flight requests before traffic is redirected. Default = 100
-  EOT
-  type        = number
-  default     = 100
-}
-
-variable "target_stickiness_config" {
-  description = <<-EOT
-  Map of stickiness configs, containing
-  - `type`            = Possible values are lb_cookie, app_cookie.
-  - `cookie_name`     = (optional) Name of the application based cookie. Only needed when `type` is app_cookie.
-                        AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used.
-  - `cookie_duration` = (optional) Only used when the `type` is lb_cookie.
-                        The time period, in seconds, during which requests from a client should be routed to the same target.
-                        After this time period expires, the load balancer-generated cookie is considered stale.
-                        The range is 1 second to 1 week (604800 seconds).
-  To disable stickiness, set `target_stickiness_config = {}`
-
-  default = {
-    type            = "lb_cookie"
-    cookie_name     = null
-    cookie_duration = 86400
-  }
-  EOT
-  type = object({
-    type            = optional(string)
-    cookie_name     = optional(string)
-    cookie_duration = optional(number)
-  })
-  default = {
-    type            = "lb_cookie"
-    cookie_name     = null
-    cookie_duration = 86400
-  }
-}
-

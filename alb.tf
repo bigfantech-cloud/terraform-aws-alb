@@ -57,8 +57,13 @@ resource "aws_lb_listener" "https" {
   certificate_arn   = var.default_ssl_certificate_arn
 
   default_action {
-    type             = "forward"
-    target_group_arn = local.target_group_arn[0]
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "URL not associated to any target"
+      status_code  = "200"
+    }
   }
 }
 
@@ -81,21 +86,21 @@ resource "aws_lb_listener_rule" "host_header_forward" {
   }
 
   dynamic "condition" {
-    for_each = can(each.value["host_header"]) ? [each.key] : []
+    for_each = each.value["host_header"] != null ? [1] : []
 
     content {
       host_header {
-        values = var.listener_rules[condition.value].host_header
+        values = each.value["host_header"]
       }
     }
   }
 
   dynamic "condition" {
-    for_each = can(each.value["path_pattern"]) ? [each.key] : []
+    for_each = each.value["path_pattern"] != null ? [1] : []
 
     content {
       path_pattern {
-        values = var.listener_rules[condition.value].path_pattern
+        values = each.value["path_pattern"]
       }
     }
   }
@@ -107,27 +112,53 @@ resource "aws_lb_listener_rule" "host_header_forward" {
 # TARGET GROUP
 #----------
 
+resource "random_string" "tg_suffix" {
+  for_each = var.targetgroup_for
+
+  length      = 1
+  min_numeric = 1
+  special     = false
+
+  keepers = {
+    name            = each.key
+    port            = each.value["port"]
+    protocol        = each.value["protocol"]
+    target_type     = each.value["target_type"]
+    vpc             = var.vpc_id
+    ip_address_type = each.value["ip_address_type"]
+  }
+}
+
 resource "aws_lb_target_group" "alb_https_tg" {
   for_each = var.targetgroup_for
 
-  name                 = "${module.this.id}-${each.key}"
-  port                 = var.target_group_port
-  protocol             = "HTTP"
+  name                 = "${substr(module.this.id, 0, 20)}-${substr(each.key, 0, 9)}-${random_string.tg_suffix[each.key].result}"
   vpc_id               = var.vpc_id
-  target_type          = var.target_type
-  deregistration_delay = var.target_deregistration_delay
+  port                 = each.value["port"]
+  protocol             = coalesce(each.value["protocol"], "HTTP")
+  protocol_version     = coalesce(each.value["protocol_version"], "HTTP1")
+  target_type          = coalesce(each.value["target_type"], "ip")
+  slow_start           = coalesce(each.value["slow_start"], 0)
+  deregistration_delay = coalesce(each.value["target_deregistration_delay"], 100)
+  ip_address_type      = coalesce(each.value["ip_address_type"], "ipv4")
+  preserve_client_ip   = coalesce(each.value["preserve_client_ip"], null)
 
   stickiness {
-    enabled         = length(var.target_stickiness_config) > 0 ? true : false
-    type            = var.target_stickiness_config["type"]
-    cookie_name     = var.target_stickiness_config["cookie_name"]
-    cookie_duration = var.target_stickiness_config["cookie_duration"]
+    enabled         = coalesce(each.value["stickiness_enabled"], true)
+    type            = coalesce(each.value["stickiness_type"], "lb_cookie")
+    cookie_name     = coalesce(each.value["stickiness_cookie_name"], null)
+    cookie_duration = coalesce(each.value["stickiness_cookie_duration"], 86400)
   }
 
   health_check {
-    path     = try(each.value["healthcheck_path"], "/")
-    protocol = try(each.value["healthcheck_protocol"], "HTTP")
-    matcher  = try(each.value["healthcheck_matcher"], 200)
+    enabled             = coalesce(each.value["healthcheck_enabled"], true)
+    path                = coalesce(each.value["healthcheck_path"], "/")
+    protocol            = coalesce(each.value["healthcheck_protocol"], "HTTP")
+    port                = coalesce(each.value["healthcheck_port"], "traffic-port")
+    matcher             = coalesce(each.value["healthcheck_matcher"], 200)
+    interval            = coalesce(each.value["healthcheck_interval"], 30)
+    timeout             = coalesce(each.value["healthcheck_timeout"], 6)
+    unhealthy_threshold = coalesce(each.value["healthcheck_unhealthy_threshold"], 3)
   }
 
 

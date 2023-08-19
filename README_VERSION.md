@@ -1,3 +1,20 @@
+# v1.2.0
+
+### Improvement
+
+#### what changed:
+
+- Now it is possible to replace Targer group with `create_before` destory `lifecycle_rule`
+- Target group input combined into single variable `targetgroup_for`
+
+#### reason for change:
+
+- Fix: S3 log bucket Lifecycle status attribute was in wrong place
+- Fix: `listener_rules` var default value keys name incorrect
+- Fix: target_group `name_prefix` character limts to 6
+
+#### info:
+
 # v1.1.1
 
 ### Fix
@@ -16,7 +33,6 @@
 
 #### info:
 
-
 # v1.1.0
 
 ### Feature
@@ -33,7 +49,7 @@ To add lifecycle transition, and expiration
 
 `log_bucket_transition_days`: Days after which log bucket objects are transitioned to Glacier. Default = 180
 
-`log_bucket_expiry_days`:     Days after which log bucket objects are deleted. Default = 365
+`log_bucket_expiry_days`: Days after which log bucket objects are deleted. Default = 365
 
 # v1.0.0
 
