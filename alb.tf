@@ -134,7 +134,7 @@ resource "aws_lb_target_group" "alb_https_tg" {
 
   name                 = "${substr(module.this.id, 0, 20)}-${substr(each.key, 0, 9)}-${random_string.tg_suffix[each.key].result}"
   vpc_id               = var.vpc_id
-  port                 = each.value["port"]
+  port                 = coalesce(each.value["port"], 80)
   protocol             = coalesce(each.value["protocol"], "HTTP")
   protocol_version     = coalesce(each.value["protocol_version"], "HTTP1")
   target_type          = coalesce(each.value["target_type"], "ip")

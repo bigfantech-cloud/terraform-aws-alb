@@ -25,8 +25,8 @@ variable "log_bucket_expiry_days" {
 #-----
 
 variable "internal" {
-  description = "Is ALB internal. Default = true"
-  default     = true
+  description = "Is ALB internal. Default = false"
+  default     = false
 }
 
 variable "vpc_id" {
@@ -96,7 +96,7 @@ variable "listener_rules" {
 variable "targetgroup_for" {
   description = "Map of Target Group identifier to Target Group configs"
   type = map(object({
-    port                 = number
+    port                 = optional(number)
     protocol             = optional(string)
     protocol_version     = optional(string)
     target_type          = optional(string)
