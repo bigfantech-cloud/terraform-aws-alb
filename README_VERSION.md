@@ -9,9 +9,7 @@
 
 #### reason for change:
 
-- Fix: S3 log bucket Lifecycle status attribute was in wrong place
-- Fix: `listener_rules` var default value keys name incorrect
-- Fix: target_group `name_prefix` character limts to 6
+Support for Target group replacement
 
 #### info:
 
